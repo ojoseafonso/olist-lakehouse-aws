@@ -1,7 +1,10 @@
-# Databricks notebook source
+from utils.spark_session import get_spark
+from utils import config
 from pyspark.sql.functions import col, sum, isnan, when, count
 from pyspark.sql.types import StructType, StructField, StringType, IntegerType, TimestampType
 
+
+spark = get_spark("silver_orders")
 # COMMAND ----------
 
 # Aplicação de schema validado
@@ -17,7 +20,7 @@ schema = StructType([
 ])
 
 # Lê o arquivo direto do catalog
-df_orders = spark.read.format("csv").schema(schema).option("header", "true").load("/Volumes/workspace/olist-storage/bronze/olist_orders_dataset.csv")
+df_orders = spark.read.format("parquet").schema(schema).option("header", "true").load("s3a://{config.BUCKET_SILVER}/olist_orders_dataset")
 
 # COMMAND ----------
 
@@ -77,4 +80,4 @@ table_name = "olist.silver.orders"
 
 df_orders.write.format("delta").mode("overwrite") \
     .option("overwriteSchema", "true") \
-    .saveAsTable(table_name)
+    .save(f"s3a://{config.BUCKET_SILVER}/orders/")
