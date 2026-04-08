@@ -20,7 +20,7 @@ schema = StructType([
 ])
 
 # Lê o arquivo direto do catalog
-df_orders = spark.read.format("parquet").schema(schema).option("header", "true").load("s3a://{config.BUCKET_SILVER}/olist_orders_dataset")
+df_orders = spark.read.format("parquet").schema(schema).option("header", "true").load("s3a://{config.BUCKET_BRONZE}/olist_orders_dataset")
 
 # COMMAND ----------
 
@@ -76,8 +76,6 @@ if duplicatas > 0:
 # COMMAND ----------
 
 # Salva o df como delta
-table_name = "olist.silver.orders"
-
 df_orders.write.format("delta").mode("overwrite") \
     .option("overwriteSchema", "true") \
     .save(f"s3a://{config.BUCKET_SILVER}/orders/")

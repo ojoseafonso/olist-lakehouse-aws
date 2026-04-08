@@ -1,36 +1,25 @@
-# Databricks notebook source
+from utils.spark_session import get_spark
+from utils import config
 import requests
-
-token = dbutils.notebook.entry_point.getDbutils().notebook().getContext().apiToken().get()
-host = dbutils.notebook.entry_point.getDbutils().notebook().getContext().apiUrl().get()
-
-response = requests.get(f"{host}/api/2.1/jobs/list", 
-    headers={"Authorization": f"Bearer {token}"})
-print(response.status_code)
-print(response.json())
-
-# COMMAND ----------
-
-dbutils.notebook.entry_point.getDbutils().notebook().getContext().notebookPath().get()
-
-# COMMAND ----------
-
 from pyspark.sql.functions import col, sum, isnan, when, count, least, min as spark_min, coalesce, lit, trunc, date_format, make_date, max as spark_max, year, quarter, month, weekofyear, dayofmonth, dayofweek, create_map, sha2, concat_ws, concat, greatest, lag, lead, expr, countDistinct
 from datetime import date
 from pyspark.sql.types import StructType, StructField, StringType, IntegerType, DoubleType, FloatType, DateType, TimestampType
 from pyspark.sql import Row
 from pyspark.sql.window import Window
 
+
+spark = get_spark("gold_fato_avaliacoes")
+
 # COMMAND ----------
 
 # Lê o arquivo direto do catalog
 
-dim_cliente = spark.read.table("olist.gold.dim_cliente")
-dim_tempo = spark.read.table("olist.gold.dim_tempo")
+dim_cliente = spark.read.load(f"s3a://{config.BUCKET_GOLD}/dim_cliente/")
+dim_tempo = spark.read.load(f"s3a://{config.BUCKET_GOLD}/dim_tempo/")
 
-reviews = spark.read.table("olist.silver.order_reviews")
-orders = spark.read.table("olist.silver.orders")
-customers = spark.read.table("olist.silver.customers")
+reviews = spark.read.load(f"s3a://{config.BUCKET_SILVER}/reviews/")
+orders = spark.read.load(f"s3a://{config.BUCKET_SILVER}/orders/")
+customers = spark.read.load(f"s3a://{config.BUCKET_SILVER}/customers/")
 
 # COMMAND ----------
 
@@ -73,8 +62,6 @@ fato_avaliacoes = left_df.select("order_id", "review_id", "review_score", "sk_te
 # COMMAND ----------
 
 # Salva o df como delta
-table_name = "olist.gold.fato_avaliacoes"
-fato_avaliacoes.write.format("delta") \
-    .mode("overwrite") \
+fato_avaliacoes.write.format("delta").mode("overwrite") \
     .option("overwriteSchema", "true") \
-    .saveAsTable(table_name)
+    .save(f"s3a://{config.BUCKET_GOLD}/fato_avaliacoes/")

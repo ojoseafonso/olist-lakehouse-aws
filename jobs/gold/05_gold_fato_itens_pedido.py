@@ -1,23 +1,25 @@
-# Databricks notebook source
+from utils.spark_session import get_spark
+from utils import config
 from pyspark.sql.functions import col, sum, isnan, when, count, least, min as spark_min, coalesce, lit, trunc, date_format, make_date, max as spark_max, year, quarter, month, weekofyear, dayofmonth, dayofweek, create_map, sha2, concat_ws, concat, greatest, lag, lead, expr
 from datetime import date
 from pyspark.sql.types import StructType, StructField, StringType, IntegerType, DoubleType, FloatType, DateType, TimestampType
 from pyspark.sql import Row
 from pyspark.sql.window import Window
 
+spark = get_spark("gold_fato_itens_pedido")
 # COMMAND ----------
 
 # Lê o arquivo direto do catalog
-dim_pedidos = spark.read.table("olist.silver.orders")
-dim_itens_pedidos = spark.read.table("olist.silver.order_items")
-dim_seller = spark.read.table("olist.gold.dim_seller")
-dim_produto = spark.read.table("olist.gold.dim_produto")
-dim_cliente = spark.read.table("olist.gold.dim_cliente")
-dim_tempo = spark.read.table("olist.gold.dim_tempo")
+dim_pedidos = spark.read.load(f"s3a://{config.BUCKET_SILVER}/orders/")
+dim_itens_pedidos = spark.read.load(f"s3a://{config.BUCKET_SILVER}/order_items/")
+dim_seller = spark.read.load(f"s3a://{config.BUCKET_GOLD}/dim_seller/")
+dim_produto = spark.read.load(f"s3a://{config.BUCKET_GOLD}/dim_produto/")
+dim_cliente = spark.read.load(f"s3a://{config.BUCKET_GOLD}/dim_cliente/")
+dim_tempo = spark.read.load(f"s3a://{config.BUCKET_GOLD}/dim_tempo/")
 
-orders = spark.read.table("olist.silver.orders")
-order_items = spark.read.table("olist.silver.order_items")
-customers = spark.read.table("olist.silver.customers")
+orders = spark.read.load(f"s3a://{config.BUCKET_SILVER}/orders/")
+order_items = spark.read.load(f"s3a://{config.BUCKET_SILVER}/order_items/")
+customers = spark.read.load(f"s3a://{config.BUCKET_SILVER}/customers/")
 
 
 
@@ -85,7 +87,6 @@ fato_itens_pedido = left_df_data4.select("sk_produto", "sk_seller", "sk_cliente"
 
 # Salva o df como delta
 table_name = "olist.gold.fato_itens_pedido"
-fato_itens_pedido.write.format("delta") \
-    .mode("overwrite") \
+fato_itens_pedido.write.format("delta").mode("overwrite") \
     .option("overwriteSchema", "true") \
-    .saveAsTable(table_name)
+    .save(f"s3a://{config.BUCKET_GOLD}/fato_itens_pedido/")

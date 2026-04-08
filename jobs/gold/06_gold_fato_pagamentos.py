@@ -1,20 +1,22 @@
-# Databricks notebook source
+from utils.spark_session import get_spark
+from utils import config
 from pyspark.sql.functions import col, sum, isnan, when, count, least, min as spark_min, coalesce, lit, trunc, date_format, make_date, max as spark_max, year, quarter, month, weekofyear, dayofmonth, dayofweek, create_map, sha2, concat_ws, concat, greatest, lag, lead, expr
 from datetime import date
 from pyspark.sql.types import StructType, StructField, StringType, IntegerType, DoubleType, FloatType, DateType, TimestampType
 from pyspark.sql import Row
 from pyspark.sql.window import Window
 
+spark = get_spark("gold_fato_pagamentos")
+
 # COMMAND ----------
 
 # Lê o arquivo direto do catalog
 
-dim_cliente = spark.read.table("olist.gold.dim_cliente")
-dim_tempo = spark.read.table("olist.gold.dim_tempo")
-
-payments = spark.read.table("olist.silver.order_payments")
-orders = spark.read.table("olist.silver.orders")
-customers = spark.read.table("olist.silver.customers")
+dim_cliente = spark.read.load(f"s3a://{config.BUCKET_GOLD}/dim_cliente/")
+dim_tempo = spark.read.load(f"s3a://{config.BUCKET_GOLD}/dim_tempo/")
+payments = spark.read.load(f"s3a://{config.BUCKET_SILVER}/payments/")
+orders = spark.read.load(f"s3a://{config.BUCKET_SILVER}/orders/")
+customers = spark.read.load(f"s3a://{config.BUCKET_SILVER}/customers/")
 
 
 
@@ -55,8 +57,6 @@ fato_pagamentos = left_df.select("order_id", "payment_sequential", "payment_type
 # COMMAND ----------
 
 # Salva o df como delta
-table_name = "olist.gold.fato_pagamentos"
-fato_pagamentos.write.format("delta") \
-    .mode("overwrite") \
+fato_pagamentos.write.format("delta").mode("overwrite") \
     .option("overwriteSchema", "true") \
-    .saveAsTable(table_name)
+    .save(f"s3a://{config.BUCKET_GOLD}/fato_pagamentos/")

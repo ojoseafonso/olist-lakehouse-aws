@@ -1,15 +1,17 @@
-# Databricks notebook source
+from utils.spark_session import get_spark
+from utils import config
 from pyspark.sql.functions import col, sum, isnan, when, count, least, min as spark_min, coalesce, lit, trunc, date_format, make_date, max as spark_max, year, quarter, month, weekofyear, dayofmonth, dayofweek, create_map, sha2, concat_ws, concat, greatest, lag, lead, expr
 from datetime import date
 from pyspark.sql.types import StructType, StructField, StringType, IntegerType, DoubleType, FloatType, DateType, TimestampType
 from pyspark.sql import Row
 from pyspark.sql.window import Window
 
+spark = get_spark("gold_dim_cliente")
 # COMMAND ----------
 
 # Lê o arquivo direto do catalog
-dim_clientes = spark.read.table("olist.silver.customers")
-dim_orders = spark.read.table("olist.silver.orders")
+dim_clientes = spark.read.load(f"s3a://{config.BUCKET_SILVER}/customers/")
+dim_orders = spark.read.load(f"s3a://{config.BUCKET_SILVER}/orders/")
 
 # COMMAND ----------
 
@@ -79,9 +81,7 @@ dim_cliente = dim_cliente.select(
 # COMMAND ----------
 
 # Salva o df como delta
-table_name = "olist.gold.dim_cliente"
 dim_cliente.write \
-    .format("delta") \
-    .mode("overwrite") \
+    .format("delta").mode("overwrite") \
     .option("overwriteSchema", "true") \
-    .saveAsTable("olist.gold.dim_cliente")
+    .save(f"s3a://{config.BUCKET_GOLD}/dim_cliente")

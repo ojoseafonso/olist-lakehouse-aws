@@ -1,25 +1,27 @@
-# Databricks notebook source
+from utils.spark_session import get_spark
+from utils import config
 from pyspark.sql.functions import col, sum, isnan, when, count, regexp_replace, to_timestamp, trim
 from pyspark.sql.types import StructType, StructField, StringType, IntegerType, TimestampType, DoubleType
+import re
+
+spark = get_spark("silver_reviews")
 
 # COMMAND ----------
 
-import re
-
 # Caminho compatível com Python puro no Databricks
-filepath = "/Volumes/workspace/olist-storage/bronze/olist_order_reviews_dataset.csv"
+#filepath = "/Volumes/workspace/olist-storage/bronze/olist_order_reviews_dataset.csv"
 
-with open(filepath, "r", encoding="utf-8") as f:
-    content = f.read()
+#with open(filepath, "r", encoding="utf-8") as f:
+#    content = f.read()
 
 # Remove \n dentro de campos entre aspas
-content_clean = re.sub(r'"[^"]*"', lambda m: m.group().replace('\n', ' '), content)
+#content_clean = re.sub(r'"[^"]*"', lambda m: m.group().replace('\n', ' '), content)
 
 # Salva versão sanitizada em path temporário
-with open("/Volumes/workspace/olist-storage/bronze/olist_order_reviews_sanitized.csv", "w", encoding="utf-8") as f:
-    f.write(content_clean)
+#with open("/Volumes/workspace/olist-storage/bronze/olist_order_reviews_sanitized.csv", "w", encoding="utf-8") as f:
+#    f.write(content_clean)
 
-print("Arquivo sanitizado salvo com sucesso.")
+#print("Arquivo sanitizado salvo com sucesso.")
 
 # COMMAND ----------
 
@@ -35,13 +37,7 @@ schema = StructType([
 ])
 
 # Lê o arquivo direto do catalog
-df_order_reviews = spark.read.format("csv") \
-    .schema(schema) \
-    .option("header", "true") \
-    .option("multiLine", "true") \
-    .option("quote", '"') \
-    .option("escape", '"') \
-    .load("/Volumes/workspace/olist-storage/bronze/olist_order_reviews_sanitized.csv") 
+df_order_reviews = spark.read..format("parquet").schema(schema).option("header", "true").load("s3a://{config.BUCKET_BRONZE}/olist_order_reviews_sanitized") 
 
 
 
@@ -135,7 +131,6 @@ if duplicatas > 0:
 # COMMAND ----------
 
 # Salva o df como delta
-table_name = "olist.silver.order_reviews"
 df_order_reviews.write.format("delta").mode("overwrite") \
     .option("overwriteSchema", "true") \
-    .saveAsTable("olist.silver.order_reviews")
+    .save(f"s3a://{config.BUCKET_SILVER}/order_reviews/")

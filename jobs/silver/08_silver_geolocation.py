@@ -1,8 +1,10 @@
-# Databricks notebook source
+from utils.spark_session import get_spark
+from utils import config
 from pyspark.sql.functions import col, sum, isnan, when, count, regexp_replace, lower, avg, translate, max as spark_max
 from pyspark.sql.types import StructType, StructField, StringType, IntegerType, TimestampType, DoubleType
 from pyspark.sql.window import Window
 
+spark = get_spark("silver_geolocation")
 # COMMAND ----------
 
 # Aplicação de schema
@@ -15,7 +17,7 @@ schema = StructType([
 ])
 
 # Lê o arquivo direto do catalog
-df_geolocation = spark.read.format("csv").schema(schema).option("header", "true").load("/Volumes/workspace/olist-storage/bronze/olist_geolocation_dataset.csv")
+df_geolocation = spark.read.format("parquet").schema(schema).option("header", "true").load("s3a://{config.BUCKET_BRONZE}/olist_geolocation_dataset")
 
 # COMMAND ----------
 
@@ -119,4 +121,4 @@ if duplicatas > 0:
 table_name = "olist.silver.geolocation"
 df_geolocation.write.format("delta").mode("overwrite") \
     .option("overwriteSchema", "true") \
-    .saveAsTable(table_name)
+    .save(f"s3a://{config.BUCKET_SILVER}/geolocation/")

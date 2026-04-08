@@ -1,0 +1,13 @@
+# Dados brutos
+opt/
+data/
+*.csv
+*.parquet
+
+# Credenciais e estado
+*.pem
+*.pub
+.env
+terraform/.terraform/
+terraform/terraform.tfstate
+terraform/terraform.tfstate.backup
