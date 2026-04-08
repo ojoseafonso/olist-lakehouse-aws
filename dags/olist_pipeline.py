@@ -9,6 +9,14 @@ COMMON = dict(
     docker_url=DOCKER_URL,
     auto_remove=True,
     network_mode="bridge",
+    volumes=["/home/ec2-user/app/jobs:/jobs"],
+    environment={
+    "BUCKET_BRONZE": "olist-lakehouse-bronze-{{ var.value.account_id }}",
+    "BUCKET_SILVER": "olist-lakehouse-silver-{{ var.value.account_id }}",
+    "BUCKET_GOLD":   "olist-lakehouse-gold-{{ var.value.account_id }}",
+     },
+    retries=2,
+    retry_delay=timedelta(minutes=2),
 )
 
 with DAG(
@@ -24,11 +32,6 @@ with DAG(
     bronze_ingest = DockerOperator(
         task_id="bronze_ingest",
         command="spark-submit /jobs/bronze/ingest_bronze.py",
-        environment={
-        "BUCKET_BRONZE": "olist-lakehouse-bronze-{{ var.value.account_id }}",
-        "BUCKET_SILVER": "olist-lakehouse-silver-{{ var.value.account_id }}",
-        "BUCKET_GOLD":   "olist-lakehouse-gold-{{ var.value.account_id }}",
-    }
         **COMMON,
     )
 

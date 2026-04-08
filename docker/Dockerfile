@@ -1,5 +1,21 @@
-FROM apache/airflow:2.8.0
-USER airflow
-RUN pip install --no-cache-dir \
-    apache-airflow-providers-docker==3.8.0 \
-    apache-airflow-providers-amazon==8.19.0
+FROM bitnami/spark:3.5
+
+# Switch to root to install packages or add files
+USER root
+
+RUN wget -P /opt/bitnami/spark/jars/ \
+    https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/3.3.4/hadoop-aws-3.3.4.jar && \
+    wget -P /opt/bitnami/spark/jars/ \
+    https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk-bundle/1.12.367/aws-java-sdk-bundle-1.12.367.jar
+
+# Criar diretório onde os jobs serão montados via volume
+RUN mkdir -p /jobs
+
+# Ajustar permissões (importante no Bitnami)
+RUN chown -R 1001:1001 /jobs
+
+# Voltar para o usuário padrão da imagem
+USER 1001
+
+# Diretório padrão
+WORKDIR /jobs

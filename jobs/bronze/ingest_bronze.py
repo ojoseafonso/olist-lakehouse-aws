@@ -4,7 +4,7 @@ from utils import config
 spark = get_spark("bronze_ingest")
 
 
-path = {"input": "/opt/airflow/raw_data,
+path = {"input": "/opt/airflow/raw_data",
 		"output": f"s3a://{config.BUCKET_BRONZE}"
 }
 
