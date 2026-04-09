@@ -14,20 +14,6 @@ variable "project_name" {
   description = "Nome do projeto"
   type        = string
   default     = "olist-lakehouse"
-
-variable "bucket_bronze_name" {
-  description = "Bucket camada bronze"
-  type        = string
-}
-
-variable "bucket_silver_name" {
-  description = "Bucket camada silver"
-  type        = string
-}
-
-variable "bucket_gold_name" {
-  description = "Bucket camada gold"
-  type        = string
 }
 
 variable "iam_role_name" {

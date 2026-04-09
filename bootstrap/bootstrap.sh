@@ -10,10 +10,10 @@ echo "Table:      ${TABLE_NAME}"
 echo "Region:     ${REGION}"
 echo "---"
 
-BUCKET_NAME="olist-tfstate-<account_id>"
+BUCKET_NAME="olist-tfstate-${ACCOUNT_ID}"
 if ! aws s3api head-bucket --bucket "$BUCKET_NAME" > /dev/null 2>&1; then
     echo "Creating bucket..."
-    aws s3api create-bucket --bucket "$BUCKET_NAME" --region <aws-region> 
+    aws s3api create-bucket --bucket "$BUCKET_NAME" --region ${REGION}
 else
     echo "Table $BUCKET_NAME already exists."
 fi

@@ -1,6 +1,7 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from airflow import DAG
 from airflow.providers.docker.operators.docker import DockerOperator
+from docker.types import Mount
 
 SPARK_IMAGE = "olist-spark:latest"
 DOCKER_URL = "unix://var/run/docker.sock"
@@ -9,11 +10,23 @@ COMMON = dict(
     docker_url=DOCKER_URL,
     auto_remove=True,
     network_mode="bridge",
-    volumes=["/home/ec2-user/app/jobs:/jobs"],
+    mounts=[
+    Mount(
+        source="/home/ec2-user/app/jobs",
+        target="/jobs",
+        type="bind",
+    ),
+    Mount(
+        source="/home/ec2-user/app/data/raw",
+        target="/data/raw",
+        type="bind",
+    ),
+    ],
     environment={
     "BUCKET_BRONZE": "olist-lakehouse-bronze-{{ var.value.account_id }}",
     "BUCKET_SILVER": "olist-lakehouse-silver-{{ var.value.account_id }}",
     "BUCKET_GOLD":   "olist-lakehouse-gold-{{ var.value.account_id }}",
+    "PYTHONPATH": "/jobs",
      },
     retries=2,
     retry_delay=timedelta(minutes=2),

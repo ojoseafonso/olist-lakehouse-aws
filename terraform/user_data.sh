@@ -1,21 +1,50 @@
 #!/bin/bash
-# Update all installed packages
-yum update -y || apt-get update -y
+set -e
 
-# Install unzip (required for the AWS CLI installation package)
-yum install unzip -y || apt-get install unzip -y
+# 1. Atualizar pacotes
+sudo dnf -y --releasever=latest update
 
-# Navigate to a temporary directory
-cd /tmp
+# 2. Instalar Docker
+sudo dnf install -y docker
 
-# Download the AWS CLI v2 installation file
-curl "https://awscli.amazonaws.com" -o "awscliv2.zip"
+# 3. Instalar Git 
+sudo dnf install -y git
 
-# Unzip the installer package
-unzip awscliv2.zip
+# 4. Iniciar e habilitar Docker
+sudo systemctl enable docker
+sudo systemctl start docker
 
-# Run the install program (this installs to /usr/local/aws and creates a symlink in /usr/local/bin)
-./aws/install
+# 5. Instalar Docker Compose
+# Cria o diretório de plugins do Docker
+mkdir -p /usr/local/lib/docker/cli-plugins
 
-# Optional: Verify the installation
-aws --version
+# Baixa a versão estável mais recente do Docker Compose
+# O comando abaixo detecta automaticamente a arquitetura (x86_64 ou arm64)
+curl -SL https://github.com/docker/compose/releases/latest/download/docker-compose-linux-$(uname -m) \
+  -o /usr/local/lib/docker/cli-plugins/docker-compose
+# Torna o arquivo executável
+chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
+sudo usermod -aG docker ec2-user
+
+# Verifica a instalação
+docker compose version
+
+# 6. Criar diretórios do Airflow
+# Set Airflow Home
+export AIRFLOW_HOME=~/airflow
+
+# Create required directories
+mkdir -p ${AIRFLOW_HOME}/dags ${AIRFLOW_HOME}/logs ${AIRFLOW_HOME}/plugins
+
+# Verify creation
+ls -R ${AIRFLOW_HOME}
+
+# 7. Clonar repo para docker-compose.yml
+git clone https://github.com/ojoseafonso/olist-lakehouse-aws.git /home/ec2-user/app
+
+# 8. Configurar AIRFLOW_UID
+echo -e "AIRFLOW_UID=1000\nAIRFLOW_GID=0" > /home/ec2-user/app/.env
+
+# 9. Subir containers
+cd /home/ec2-user/app
+docker compose up -d 

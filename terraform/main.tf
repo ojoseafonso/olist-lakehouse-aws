@@ -6,25 +6,35 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 5.92"
     }
-  
+  }
   # S3 backend configuration
 
   backend "s3" {
-    bucket         = "olist-tfstate-<account_id>" # Replace with your bucket name
+    bucket         = "olist-tfstate-832569408583" # Replace with your bucket name
     key            = "olist-lakehouse-aws/terraform/terraform.tfstate" # Object path within the bucket
     region         = "us-east-1" # Replace with your region
     encrypt        = true
-    dynamodb_table = "terraform_state_lock" # Replace with your DynamoDB table name
+    dynamodb_table = "terraform-state-lock-table" # Replace with your DynamoDB table name
   }
-}
-
-# Provider configuration (credentials handled via environment variables or CLI config)
-provider "aws" {
-  region = var.aws_region
 }
 
 data "aws_caller_identity" "current" {}
 
+data "aws_vpc" "default" {
+  default = true
+}
+
+data "aws_ami" "amazon_linux" {
+  most_recent = true
+  owners      = ["amazon"]
+
+  filter {
+    name   = "name"
+    values = ["al2023-ami-*-x86_64"]
+  }
+}
+
+# Provider configuration (credentials handled via environment variables or CLI config)
 locals {
   account_id    = data.aws_caller_identity.current.account_id
   bucket_bronze = "${var.project_name}-bronze-${local.account_id}"
@@ -34,13 +44,13 @@ locals {
   public_key_path = "~/.ssh/olist-lakehouse.pub"
 }
 
+provider "aws" {
+  region = var.aws_region
+}
+
 resource "aws_key_pair" "key_pair_olist" {
   key_name   = local.key_name
   public_key = file(local.public_key_path)
-}
-
-data "aws_vpc" "default" {
-  default = true
 }
 
 resource "aws_security_group" "main" {
@@ -56,7 +66,7 @@ resource "aws_security_group" "main" {
     description = "SSH"
   }
 
-    ingress {
+  ingress {
     from_port   = 8080
     to_port     = 8080
     protocol    = "tcp"
@@ -70,7 +80,6 @@ resource "aws_security_group" "main" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
-}
 
   tags = {
     Name    = "${var.project_name}-sg"
@@ -83,10 +92,7 @@ resource "aws_iam_role" "main" {
   name               = "${var.project_name}-role"
 
 #Define a role, no caso assumir a função de executor por parte do EC2
-  inline_policy {
-    name = "my_inline_policy"
-
-    policy = jsonencode({
+  assume_role_policy = jsonencode({
       Version = "2012-10-17"
       Statement = [
         {
@@ -96,7 +102,6 @@ resource "aws_iam_role" "main" {
         }
       ]
     })
-  }
 
     tags = {
     Name    = "${var.project_name}-role"
@@ -132,7 +137,8 @@ resource "aws_iam_role_policy" "s3_access" {
 
 resource "aws_iam_instance_profile" "main" {
   name = "${var.project_name}-role-profile"
-  role = aws_iam_role.main.id
+  role = aws_iam_role.main.name
+}
 
 resource "aws_s3_bucket" "bronze" {
   bucket = local.bucket_bronze
@@ -215,25 +221,17 @@ resource "aws_s3_bucket_public_access_block" "gold" {
   restrict_public_buckets = true
 }
 
-data "aws_ami" "amazon_linux" {
-  most_recent = true
-  owners      = ["amazon"]
-
-  filter {
-    name   = "name"
-    values = ["al2023-ami-*-x86_64"]
-  }
-}
-
 resource "aws_instance" "main" {
   ami           = data.aws_ami.amazon_linux.id
   instance_type = var.instance_type
-  key_name      = aws_key_pair.main.key_name
+  key_name      = aws_key_pair.key_pair_olist.key_name
   vpc_security_group_ids = [aws_security_group.main.id]
-  iam_instance_profile =   aws_iam_instance_profile.main.id
+  iam_instance_profile =   aws_iam_instance_profile.main.name
   user_data = file("user_data.sh")
 
   tags = {
   Name    = "${var.project_name}-ec2"
   Project = var.project_name
+  }
+
 }
