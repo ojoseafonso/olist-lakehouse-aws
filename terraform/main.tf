@@ -228,6 +228,10 @@ resource "aws_instance" "main" {
   vpc_security_group_ids = [aws_security_group.main.id]
   iam_instance_profile =   aws_iam_instance_profile.main.name
   user_data = file("user_data.sh")
+  root_block_device {
+    volume_size = 30
+    volume_type = "gp3"
+  }
 
   tags = {
   Name    = "${var.project_name}-ec2"
