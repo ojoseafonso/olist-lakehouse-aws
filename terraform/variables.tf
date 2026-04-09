@@ -5,9 +5,9 @@ variable "aws_region" {
 }
 
 variable "instance_type" {
-  description = "Tipo de instância EC2 (Free Tier: t3.micro)"
+  description = "Tipo de instância EC2"
   type        = string
-  default     = "t3.micro"
+  default     = "t3.small"
 }
 
 variable "project_name" {
