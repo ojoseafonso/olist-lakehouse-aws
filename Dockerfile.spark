@@ -1,4 +1,4 @@
-FROM bitnami/spark:3.5
+FROM apache/spark:3.5.1
 
 # Switch to root to install packages or add files
 USER root
