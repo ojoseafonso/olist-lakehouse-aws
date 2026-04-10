@@ -4,7 +4,7 @@ from airflow.providers.docker.operators.docker import DockerOperator
 from docker.types import Mount
 
 SPARK_IMAGE = "olist-spark:latest"
-DOCKER_URL = "unix://var/run/docker.sock"
+DOCKER_URL = "unix:///var/run/docker.sock"
 COMMON = dict(
     image=SPARK_IMAGE,
     docker_url=DOCKER_URL,
