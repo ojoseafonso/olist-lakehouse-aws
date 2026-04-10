@@ -3,15 +3,15 @@ FROM apache/spark:3.5.1
 # Switch to root to install packages or add files
 USER root
 
-RUN wget -P /opt/bitnami/spark/jars/ \
+RUN wget -P /opt/spark/jars/ \
     https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/3.3.4/hadoop-aws-3.3.4.jar && \
-    wget -P /opt/bitnami/spark/jars/ \
+    wget -P /opt/spark/jars/ \
     https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk-bundle/1.12.367/aws-java-sdk-bundle-1.12.367.jar
 
 # Criar diretório onde os jobs serão montados via volume
 RUN mkdir -p /jobs
 
-# Ajustar permissões (importante no Bitnami)
+# Ajustar permissões
 RUN chown -R 1001:1001 /jobs
 
 # Voltar para o usuário padrão da imagem
