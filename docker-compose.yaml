@@ -116,7 +116,6 @@ services:
   airflow-scheduler:
     <<: *airflow-common
     command: scheduler
-    user: "${AIRFLOW_UID:-50000}:994"
     healthcheck:
       test: ["CMD", "curl", "--fail", "http://localhost:8974/health"]
       interval: 30s
