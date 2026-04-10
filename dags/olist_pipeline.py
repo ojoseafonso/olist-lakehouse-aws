@@ -23,9 +23,9 @@ COMMON = dict(
     ),
     ],
     environment={
-    "BUCKET_BRONZE": "olist-lakehouse-bronze-{{ var.value.account_id }}",
-    "BUCKET_SILVER": "olist-lakehouse-silver-{{ var.value.account_id }}",
-    "BUCKET_GOLD":   "olist-lakehouse-gold-{{ var.value.account_id }}",
+    "BUCKET_BRONZE": "olist-lakehouse-bronze-832569408583",
+    "BUCKET_SILVER": "olist-lakehouse-silver-832569408583",
+    "BUCKET_GOLD":   "olist-lakehouse-gold-832569408583",
     "PYTHONPATH": "/jobs",
      },
     retries=2,
