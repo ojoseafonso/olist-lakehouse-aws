@@ -16,11 +16,6 @@ COMMON = dict(
         target="/jobs",
         type="bind",
     ),
-    Mount(
-        source="/home/ec2-user/app/data/raw",
-        target="/data/raw",
-        type="bind",
-    ),
     ],
     environment={
     "BUCKET_BRONZE": "olist-lakehouse-bronze-832569408583",

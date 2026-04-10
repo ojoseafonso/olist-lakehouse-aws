@@ -4,7 +4,7 @@ from utils import config
 spark = get_spark("bronze_ingest")
 
 
-path = {"input": "/opt/airflow/raw_data",
+path = {"input": "s3a://olist-lakehouse-bronze-832569408583/raw",
 		"output": f"s3a://{config.BUCKET_BRONZE}"
 }
 
@@ -24,6 +24,6 @@ for f in files:
         header=True,
         encoding="utf-8",
     )
-	df.write.mode("overwrite").parquet(f"{path["output"]}/{f}/")
+df.write.mode("overwrite").parquet(f"{path['output']}/{f}/")
 
 spark.stop()
