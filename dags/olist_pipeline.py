@@ -3,7 +3,7 @@ from airflow import DAG
 from airflow.providers.docker.operators.docker import DockerOperator
 from docker.types import Mount
 
-SPARK_IMAGE = "olist-spark:latest"
+SPARK_IMAGE = "olist-spark:3.5.1"
 DOCKER_URL = "unix:///var/run/docker.sock"
 COMMON = dict(
     image=SPARK_IMAGE,
@@ -23,8 +23,9 @@ COMMON = dict(
     "BUCKET_SILVER": "olist-lakehouse-silver-832569408583",
     "BUCKET_GOLD":   "olist-lakehouse-gold-832569408583",
     "PYTHONPATH": "/jobs",
+    "SPARK_SUBMIT_OPTS": "-Divy.home=/tmp/.ivy2 -Divy.cache.dir=/tmp/.ivy2",
      },
-    mount_tmp_dir=False
+    mount_tmp_dir=False,
     retries=2,
     retry_delay=timedelta(minutes=2),
 )

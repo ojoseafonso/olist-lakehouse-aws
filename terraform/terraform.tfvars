@@ -1,5 +1,5 @@
 aws_region       = "us-east-1"
-instance_type    = "t3.small"
+instance_type    = "t3.medium"
 project_name     = "olist-lakehouse"
 iam_role_name    = "olist-ec2-role"
 allowed_ssh_cidr = "138.0.245.156/32"
