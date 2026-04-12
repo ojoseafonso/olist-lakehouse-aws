@@ -47,6 +47,10 @@ echo -e "AIRFLOW_UID=1000\nAIRFLOW_GID=0" > /home/ec2-user/app/.env
 
 sudo chown -R ec2-user:ec2-user /home/ec2-user/app
 
-# 9. Subir containers
+# 9. Build da imagem Spark
 cd /home/ec2-user/app
-docker compose up -d 
+sudo -u ec2-user docker build -t olist-spark:3.5.1 -f Dockerfile.spark .
+
+# 10. Subir containers
+docker compose down || true
+docker compose up -d
