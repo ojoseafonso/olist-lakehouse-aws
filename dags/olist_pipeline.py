@@ -24,6 +24,7 @@ COMMON = dict(
     "BUCKET_GOLD":   "olist-lakehouse-gold-832569408583",
     "PYTHONPATH": "/jobs",
      },
+    mount_tmp_dir=False
     retries=2,
     retry_delay=timedelta(minutes=2),
 )
@@ -40,93 +41,93 @@ with DAG(
     # ── BRONZE ───────────────────────────────────────────────
     bronze_ingest = DockerOperator(
         task_id="bronze_ingest",
-        command="spark-submit /jobs/bronze/ingest_bronze.py",
+        command="/opt/spark/bin/spark-submit /jobs/bronze/ingest_bronze.py",
         **COMMON,
     )
 
     # ── SILVER ───────────────────────────────────────────────
     silver_orders = DockerOperator(
         task_id="silver_orders",
-        command="spark-submit /jobs/silver/01_silver_orders.py",
+        command="/opt/spark/bin/spark-submit /jobs/silver/01_silver_orders.py",
         **COMMON,
     )
     silver_products = DockerOperator(
         task_id="silver_products",
-        command="spark-submit /jobs/silver/02_silver_products.py",
+        command="/opt/spark/bin/spark-submit /jobs/silver/02_silver_products.py",
         **COMMON,
     )
     silver_order_items = DockerOperator(
         task_id="silver_order_items",
-        command="spark-submit /jobs/silver/03_silver_order_items.py",
+        command="/opt/spark/bin/spark-submit /jobs/silver/03_silver_order_items.py",
         **COMMON,
     )
     silver_reviews = DockerOperator(
         task_id="silver_reviews",
-        command="spark-submit /jobs/silver/04_silver_reviews.py",
+        command="/opt/spark/bin/spark-submit /jobs/silver/04_silver_reviews.py",
         **COMMON,
     )
     silver_customers = DockerOperator(
         task_id="silver_customers",
-        command="spark-submit /jobs/silver/05_silver_customers.py",
+        command="/opt/spark/bin/spark-submit /jobs/silver/05_silver_customers.py",
         **COMMON,
     )
     silver_sellers = DockerOperator(
         task_id="silver_sellers",
-        command="spark-submit /jobs/silver/06_silver_sellers.py",
+        command="/opt/spark/bin/spark-submit /jobs/silver/06_silver_sellers.py",
         **COMMON,
     )
     silver_payments = DockerOperator(
         task_id="silver_payments",
-        command="spark-submit /jobs/silver/07_silver_payments.py",
+        command="/opt/spark/bin/spark-submit /jobs/silver/07_silver_payments.py",
         **COMMON,
     )
     silver_geolocation = DockerOperator(
         task_id="silver_geolocation",
-        command="spark-submit /jobs/silver/08_silver_geolocation.py",
+        command="/opt/spark/bin/spark-submit /jobs/silver/08_silver_geolocation.py",
         **COMMON,
     )
     silver_category = DockerOperator(
         task_id="silver_category",
-        command="spark-submit /jobs/silver/09_silver_product_category_name_translation.py",
+        command="/opt/spark/bin/spark-submit /jobs/silver/09_silver_product_category_name_translation.py",
         **COMMON,
     )
 
     # ── GOLD DIMENSÕES ───────────────────────────────────────
     gold_dim_tempo = DockerOperator(
         task_id="gold_dim_tempo",
-        command="spark-submit /jobs/gold/01_gold_dim_tempo.py",
+        command="/opt/spark/bin/spark-submit /jobs/gold/01_gold_dim_tempo.py",
         **COMMON,
     )
     gold_dim_cliente = DockerOperator(
         task_id="gold_dim_cliente",
-        command="spark-submit /jobs/gold/02_gold_dim_cliente.py",
+        command="/opt/spark/bin/spark-submit /jobs/gold/02_gold_dim_cliente.py",
         **COMMON,
     )
     gold_dim_produto = DockerOperator(
         task_id="gold_dim_produto",
-        command="spark-submit /jobs/gold/03_gold_dim_produto.py",
+        command="/opt/spark/bin/spark-submit /jobs/gold/03_gold_dim_produto.py",
         **COMMON,
     )
     gold_dim_seller = DockerOperator(
         task_id="gold_dim_seller",
-        command="spark-submit /jobs/gold/04_gold_dim_seller.py",
+        command="/opt/spark/bin/spark-submit /jobs/gold/04_gold_dim_seller.py",
         **COMMON,
     )
 
     # ── GOLD FATOS ───────────────────────────────────────────
     gold_fato_itens = DockerOperator(
         task_id="gold_fato_itens_pedido",
-        command="spark-submit /jobs/gold/05_gold_fato_itens_pedido.py",
+        command="/opt/spark/bin/spark-submit /jobs/gold/05_gold_fato_itens_pedido.py",
         **COMMON,
     )
     gold_fato_pagamentos = DockerOperator(
         task_id="gold_fato_pagamentos",
-        command="spark-submit /jobs/gold/06_gold_fato_pagamentos.py",
+        command="/opt/spark/bin/spark-submit /jobs/gold/06_gold_fato_pagamentos.py",
         **COMMON,
     )
     gold_fato_avaliacoes = DockerOperator(
         task_id="gold_fato_avaliacoes",
-        command="spark-submit /jobs/gold/07_gold_fato_avaliacoes.py",
+        command="/opt/spark/bin/spark-submit /jobs/gold/07_gold_fato_avaliacoes.py",
         **COMMON,
     )
 

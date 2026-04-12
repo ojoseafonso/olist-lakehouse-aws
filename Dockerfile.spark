@@ -14,6 +14,13 @@ RUN mkdir -p /jobs
 # Ajustar permissões
 RUN chown -R 1001:1001 /jobs
 
+# 
+RUN mkdir -p /tmp/.ivy2 && \
+    chown -R 1001:1001 /tmp/.ivy2
+
+# 
+ENV SPARK_SUBMIT_OPTS="-Divy.home=/tmp/.ivy2 -Divy.cache.dir=/tmp/.ivy2"
+
 # Voltar para o usuário padrão da imagem
 USER 1001
 
