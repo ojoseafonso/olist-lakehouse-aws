@@ -45,6 +45,8 @@ git clone https://github.com/ojoseafonso/olist-lakehouse-aws.git /home/ec2-user/
 # 8. Configurar AIRFLOW_UID
 echo -e "AIRFLOW_UID=1000\nAIRFLOW_GID=0" > /home/ec2-user/app/.env
 
+sudo chown -R ec2-user:ec2-user /home/ec2-user/app
+
 # 9. Subir containers
 cd /home/ec2-user/app
 docker compose up -d 

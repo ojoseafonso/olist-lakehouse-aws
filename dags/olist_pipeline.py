@@ -7,8 +7,10 @@ SPARK_IMAGE = "olist-spark:latest"
 DOCKER_URL = "unix:///var/run/docker.sock"
 COMMON = dict(
     image=SPARK_IMAGE,
+    docker_url=DOCKER_URL,
     auto_remove=True,
     network_mode="bridge",
+    force_pull=False,
     mounts=[
     Mount(
         source="/home/ec2-user/app/jobs",
