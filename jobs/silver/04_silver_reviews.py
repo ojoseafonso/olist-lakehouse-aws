@@ -37,7 +37,7 @@ schema = StructType([
 ])
 
 # Lê o arquivo direto do catalog
-df_order_reviews = spark.read..format("parquet").schema(schema).option("header", "true").load("s3a://{config.BUCKET_BRONZE}/olist_order_reviews_sanitized") 
+df_order_reviews = spark.read..format("parquet").schema(schema).option("header", "true").load(f"s3a://{config.BUCKET_BRONZE}/olist_order_reviews_sanitized") 
 
 
 

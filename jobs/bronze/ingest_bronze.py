@@ -24,6 +24,7 @@ for f in files:
         header=True,
         encoding="utf-8",
     )
-df.write.mode("overwrite").parquet(f"{path['output']}/{f}/")
+    df.write.mode("overwrite").parquet(f"{path['output']}/{f}/")
 
+    
 spark.stop()
