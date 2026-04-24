@@ -7,20 +7,13 @@ from pyspark.sql.types import StructType, StructField, StringType, IntegerType, 
 spark = get_spark("silver_orders")
 # COMMAND ----------
 
-# Aplicação de schema validado
-schema = StructType([
-    StructField("order_id", StringType(), False),
-    StructField("customer_id", StringType(), False),
-    StructField("order_status", StringType(), False), 
-    StructField("order_purchase_timestamp", TimestampType(), False),  
-    StructField("order_approved_at", TimestampType(), True), 
-    StructField("order_delivered_carrier_date", TimestampType(), True), 
-    StructField("order_delivered_customer_date", TimestampType(), True), 
-    StructField("order_estimated_delivery_date", TimestampType(), True), 
-])
-
 # Lê o arquivo direto do catalog
-df_orders = spark.read.format("parquet").schema(schema).option("header", "true").load(f"s3a://{config.BUCKET_BRONZE}/olist_orders_dataset")
+df_orders = spark.read.format("parquet").option("header", "true").load(f"s3a://{config.BUCKET_BRONZE}/olist_orders_dataset") \
+.withColumn("order_purchase_timestamp",to_timestamp("order_purchase_timestamp", "yyyy-MM-dd HH:mm:ss")) \
+.withColumn("order_approved_at",to_timestamp("order_approved_at", "yyyy-MM-dd HH:mm:ss")) \
+.withColumn("order_delivered_carrier_date",to_timestamp("order_delivered_carrier_date", "yyyy-MM-dd HH:mm:ss")) \
+.withColumn("order_delivered_customer_date",to_timestamp("order_delivered_customer_date", "yyyy-MM-dd HH:mm:ss")) \
+.withColumn("order_estimated_delivery_date",to_timestamp("order_estimated_delivery_date", "yyyy-MM-dd HH:mm:ss")) \
 
 # COMMAND ----------
 
